@@ -4,7 +4,7 @@
  *
  * Main.java
  * Entry point. Asks the user which file to check, then runs the acyclicity check.
- * If a cycle exists, it is found and printed.
+ * Prints execution time in nanoseconds and milliseconds.
  */
 
 import java.util.Scanner;
@@ -23,19 +23,32 @@ public class Main {
         System.out.println();
         System.out.println("=== Reading graph from: " + fileName + " ===");
         DirectedGraph graph = GraphFileReader.readGraph(fileName);
-        System.out.println();
 
+        System.out.println();
         System.out.println("=== Running Sink Elimination Algorithm ===");
+
+        // Start timing
+        long startTime = System.nanoTime();
+
         boolean isAcyclic = AcyclicChecker.checkAcyclic(graph);
+
+        // Stop timing
+        long endTime = System.nanoTime();
+        long elapsedNs = endTime - startTime;
+        double elapsedMs = elapsedNs / 1_000_000.0;
+
+        System.out.println("--------------------------------------------------");
         System.out.println();
 
         if (isAcyclic) {
-            System.out.println("Result: Graph is ACYCLIC (YES)");
+            System.out.println("ANSWER: YES - this graph is acyclic");
         } else {
-            System.out.println("Result: Graph has a CYCLE (NO)");
-            System.out.println();
-            System.out.println("=== Finding the cycle ===");
+            System.out.println("ANSWER: NO - this graph has a cycle");
             AcyclicChecker.findAndPrintCycle(graph);
         }
+
+        System.out.printf("Execution time (ns): %d%n", elapsedNs);
+        System.out.printf("Execution time (ms): %.4f%n", elapsedMs);
+        System.out.println("--------------------------------------------------");
     }
 }
