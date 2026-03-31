@@ -23,18 +23,17 @@ public class AcyclicChecker {
      *       for cycle printing later.
      */
     public static boolean checkAcyclic(DirectedGraph original) {
-        // Make a fresh copy to avoid destroying the original
         DirectedGraph copy = makeCopy(original);
 
         while (!copy.isEmpty()) {
             Integer sink = copy.findSink();
 
             if (sink == null) {
-                // No sink means every remaining node is part of a cycle
+                System.out.println("No sink found - graph has a cycle");
                 return false;
             }
 
-            System.out.println("  Found sink: " + sink + " -> removing it");
+            System.out.println("Found sink: " + sink + " - removing it");
             copy.removeNode(sink);
         }
 
@@ -44,27 +43,24 @@ public class AcyclicChecker {
     /*
      * FIND AND PRINT A CYCLE (Task 5)
      *
-     * Uses DFS with three states for each node:
+     * Uses DFS with three colour states:
      *   WHITE (0) = not visited yet
      *   GRAY  (1) = currently being explored (in the DFS stack)
      *   BLACK (2) = fully explored, no cycle through here
      *
-     * If we reach a GRAY node during DFS, we found a cycle.
-     * We then trace back through the parent map to print it.
+     * If we reach a GRAY node during DFS, we found a back-edge = cycle.
      */
     public static void findAndPrintCycle(DirectedGraph graph) {
-        Map<Integer, Integer> color  = new HashMap<>(); // WHITE=0, GRAY=1, BLACK=2
-        Map<Integer, Integer> parent = new HashMap<>(); // to trace the cycle path
+        Map<Integer, Integer> color  = new HashMap<>();
+        Map<Integer, Integer> parent = new HashMap<>();
 
         final int WHITE = 0, GRAY = 1, BLACK = 2;
 
-        // Initialise all nodes as WHITE
         for (Integer node : graph.getNodes()) {
             color.put(node, WHITE);
             parent.put(node, null);
         }
 
-        // Try DFS from every unvisited node
         for (Integer node : graph.getNodes()) {
             if (color.get(node) == WHITE) {
                 Integer cycleNode = dfs(graph, node, color, parent, WHITE, GRAY, BLACK);
@@ -76,17 +72,15 @@ public class AcyclicChecker {
         }
     }
 
-    // DFS helper - returns the node where the cycle was detected, or null
     private static Integer dfs(DirectedGraph graph, int start,
                                Map<Integer, Integer> color,
                                Map<Integer, Integer> parent,
                                int WHITE, int GRAY, int BLACK) {
-        color.put(start, GRAY); // mark as "currently visiting"
+        color.put(start, GRAY);
 
         for (int neighbour : graph.getNeighbours(start)) {
             if (color.get(neighbour) == GRAY) {
-                // Found a back-edge -> cycle detected at 'neighbour'
-                parent.put(neighbour, start); // connect the last edge
+                parent.put(neighbour, start);
                 return neighbour;
             }
             if (color.get(neighbour) == WHITE) {
@@ -96,22 +90,20 @@ public class AcyclicChecker {
             }
         }
 
-        color.put(start, BLACK); // fully explored, no cycle here
+        color.put(start, BLACK);
         return null;
     }
 
-    // Trace the cycle using the parent map and print it
     private static void printCycle(int cycleNode, Map<Integer, Integer> parent) {
         List<Integer> cycle = new ArrayList<>();
         int current = cycleNode;
 
-        // Walk back through parents until we return to cycleNode
         while (true) {
             cycle.add(current);
             current = parent.get(current);
             if (current == cycleNode) break;
         }
-        cycle.add(cycleNode); // close the cycle
+        cycle.add(cycleNode);
 
         Collections.reverse(cycle);
 
@@ -123,7 +115,6 @@ public class AcyclicChecker {
         System.out.println();
     }
 
-    // Make a deep copy of the graph (so the original is not destroyed)
     private static DirectedGraph makeCopy(DirectedGraph original) {
         DirectedGraph copy = new DirectedGraph();
         for (Integer node : original.getNodes()) {
